@@ -19,6 +19,7 @@ const extractTikTokMetrics = json => {
 	if (data.statusCode !== 0) {
 		return { 
 			status: false,
+			data: [],
 			error: data.statusMsg
 		};
 	}

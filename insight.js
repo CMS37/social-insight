@@ -15,15 +15,15 @@ const runInsight = (parseIdFn, buildRequestsFn, extractMetricsFn, sheetName) => 
 	const pendingRows = [];
 	const pendingIds = [];
 	linkValues.forEach((link, idx) => {
-	  const rowIdx = idx + 2;
-	  const hasData = dataValues[idx].every(cell => cell !== '' && cell != null);
-	  if (link && !hasData) {
-		const id = parseIdFn(link);
-		if (id) {
-		  pendingRows.push(rowIdx);
-		  pendingIds.push(id);
+		const rowIdx = idx + 2;
+		const hasData = dataValues[idx].every(cell => cell !== '' && cell != null);
+		if (link && !hasData) {
+			const id = parseIdFn(link);
+			if (id) {
+				pendingRows.push(rowIdx);
+				pendingIds.push(id);
+			}
 		}
-	  }
 	});
   
 	if (pendingIds.length === 0) return ui.alert('채워야 할 빈 데이터가 없습니다.');
