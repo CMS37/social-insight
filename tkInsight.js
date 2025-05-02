@@ -1,8 +1,3 @@
-const parseTikTokVideoId = url => {
-	const match = url.match(/\/(?:video|v)\/(\d+)/) || url.match(/vm\.tiktok\.com\/(\w+)/);
-	return match ? match[1] : null;
-};
-
 const buildTikTokPostRequest = ids =>
 	ids.map(id => ({
 		url: `https://${Config.TK_HOST}/api/post/detail?videoId=${id}`,

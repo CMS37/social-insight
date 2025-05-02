@@ -48,8 +48,3 @@ const runInsight = (parseIdFn, buildRequestsFn, extractMetricsFn, sheetName) => 
   
 	ui.alert(`✅ ${sheetName} 인사이트 수집 완료\n\n요청한 포스트수: ${pendingIds.length}${failures.length ? `\n\n실패 상세:\n${failures.join('\n')}` : ''}`);
 }
-
-/*
-틱톡 = statusCode -> statusMsg
-인스타 = status -> errorMessage
-*/

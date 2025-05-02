@@ -14,3 +14,8 @@ const fetchAllInBatches = (requests, batchSize = Config.BATCH_SIZE, delay = Conf
 	}
 	return responses;
 };
+
+const parseTikTokVideoId = url => {
+	const match = url.match(/\/(?:video|v)\/(\d+)/) || url.match(/vm\.tiktok\.com\/(\w+)/);
+	return match ? match[1] : null;
+};
