@@ -1,5 +1,5 @@
 const collectTikTokComments = () => {
-	ui = SpreadsheetApp.getUi();
+	const ui = SpreadsheetApp.getUi();
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
 	const sheet = ss.getSheetByName('틱톡 댓글');
 	const url = sheet.getRange('E2').getValue();
