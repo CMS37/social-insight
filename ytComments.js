@@ -2,7 +2,7 @@ const fetchYouTubeComments = () => {
 	const ui = SpreadsheetApp.getUi();
 	const ss    = SpreadsheetApp.getActiveSpreadsheet();
 	const sheet = ss.getSheetByName('유튜브 댓글');
-	const url = sheet.getRange('E2').getValue();
+	const url = sheet.getRange('E1').getValue();
 	const videoId = parseYouTubeVideoId(url);
 
 	if (!videoId) {
@@ -33,8 +33,7 @@ const fetchYouTubeComments = () => {
 
 	if (allComments.length) {
 		sheet
-		.getRange(2, 1, allComments.length, 3)
+		.getRange(3, 1, allComments.length, 3)
 		.setValues(allComments);
 	}
 };
-  

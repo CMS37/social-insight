@@ -1,4 +1,4 @@
-const collectTikTokComments = () => {
+const fetchTikTokComments = () => {
 	const ui = SpreadsheetApp.getUi();
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
 	const sheet = ss.getSheetByName('틱톡 댓글');
