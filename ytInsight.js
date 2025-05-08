@@ -1,19 +1,3 @@
-const parseDuration = iso => {
-	const [, h='0', m='0', s='0'] = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/) || [];
-	return `${h}:${m.padStart(2,'0')}:${s.padStart(2,'0')}`;
-};
-	
-const parseYouTubeVideoId = url => {
-	for (const re of [
-		/(?:youtube\.com\/.*v=|youtu\.be\/)([A-Za-z0-9_-]{11})/,
-		/youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/
-	]) {
-		const m = url.match(re);
-		if (m && m[1]) return m[1];
-	}
-	return null;
-};
-	
 const fetchYouTubeInsightsBatch = () => {
 	const sheet   = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 	const START   = 3;
