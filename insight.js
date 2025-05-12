@@ -26,12 +26,20 @@ const runInsight = (parseIdFn, buildRequestsFn, extractMetricsFn, sheetName) => 
 	if (!pendingIds.length) return ui.alert('✅ 빈 데이터가 없습니다.');
 
 	const requests  = buildRequestsFn(pendingIds);
-	const responses = fetchAllInBatches(requests);
 	const failures  = [];
 
-	responses.forEach((resp, j) => {
-		const row = pendingRows[j];
+	const firstResps = fetchAllInBatches(requests);
+	const retryRows = [];
+	const retryReqs = [];
 
+	firstResps.forEach((resp, i) => {
+		const row = pendingRows[i];
+
+		if (resp.getResponseCode() === 429) {
+			retryRows.push(row);
+			retryReqs.push(requests[i]);
+			return;
+		}
 		if (resp.getResponseCode() !== 200) {
 			sheet.getRange(row, 1).setBackground('#ffcccc');
 			failures.push(`${row}행 실패: HTTP ${resp.getResponseCode()}`);
@@ -40,7 +48,6 @@ const runInsight = (parseIdFn, buildRequestsFn, extractMetricsFn, sheetName) => 
 
 		const raw = resp.getContentText().trim();
 		const { status, data, error } = extractMetricsFn(raw);
-
 		if (status) {
 			sheet.getRange(row, 2, 1, data.length).setValues([data]);
 		} else {
@@ -49,8 +56,31 @@ const runInsight = (parseIdFn, buildRequestsFn, extractMetricsFn, sheetName) => 
 		}
 	});
 
+	if (retryReqs.length) {
+		Utilities.sleep(Config.DELAY_MS * 2);
+		const retryResps = fetchAllInBatches(retryReqs);
+		retryResps.forEach((resp, j) => {
+		const row = retryRows[j];
+		if (resp.getResponseCode() !== 200) {
+			sheet.getRange(row, 1).setBackground('#ffcccc');
+			failures.push(`${row}행 실패: HTTP ${resp.getResponseCode()}`);
+			return;
+		}
+		// 재요청 성공 처리
+		const raw = resp.getContentText().trim();
+		const { status, data, error } = extractMetricsFn(raw);
+		if (status) {
+			sheet.getRange(row, 2, 1, data.length).setValues([data]);
+		} else {
+			sheet.getRange(row, 1).setBackground('#ffcccc');
+			failures.push(`${row}행 실패: ${error}`);
+		}
+		});
+	}
+
 	ui.alert(
 		`✅ ${sheetName} 인사이트 완료\n` +
-		`요청: ${pendingIds.length}건${failures.length ? `\n실패:\n${failures.join('\n')}` : ''}`
+		`요청: ${pendingIds.length}건` +
+		(failures.length ? `\n실패:\n${failures.join('\n')}` : '')
 	);
 };
