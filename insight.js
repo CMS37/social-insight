@@ -25,58 +25,28 @@ const runInsight = (parseIdFn, buildRequestsFn, extractMetricsFn, sheetName) => 
 
 	if (!pendingIds.length) return ui.alert('✅ 빈 데이터가 없습니다.');
 
-	const requests  = buildRequestsFn(pendingIds);
-	const failures  = [];
+	const requests = buildRequestsFn(pendingIds);
+	const responses = fetchAllWithBackoff(requests);
+	const failures = [];
 
-	const firstResps = fetchAllInBatches(requests);
-	const retryRows = [];
-	const retryReqs = [];
-
-	firstResps.forEach((resp, i) => {
+	responses.forEach((resp, i) => {
 		const row = pendingRows[i];
+		const code = resp.getResponseCode();
 
-		if (resp.getResponseCode() === 429) {
-			retryRows.push(row);
-			retryReqs.push(requests[i]);
-			return;
+		if (code !== 200) {
+		sheet.getRange(row, 1).setBackground('#ffcccc');
+		failures.push(`${row}행 실패: HTTP ${code}`);
+		return;
 		}
-		if (resp.getResponseCode() !== 200) {
-			sheet.getRange(row, 1).setBackground('#ffcccc');
-			failures.push(`${row}행 실패: HTTP ${resp.getResponseCode()}`);
-			return;
-		}
-
 		const raw = resp.getContentText().trim();
 		const { status, data, error } = extractMetricsFn(raw);
 		if (status) {
-			sheet.getRange(row, 2, 1, data.length).setValues([data]);
+		sheet.getRange(row, 2, 1, data.length).setValues([data]);
 		} else {
-			sheet.getRange(row, 1).setBackground('#ffcccc');
-			failures.push(`${row}행 실패: ${error}`);
+		sheet.getRange(row, 1).setBackground('#ffcccc');
+		failures.push(`${row}행 실패: ${error}`);
 		}
 	});
-
-	if (retryReqs.length) {
-		Utilities.sleep(Config.DELAY_MS * 2);
-		const retryResps = fetchAllInBatches(retryReqs);
-		retryResps.forEach((resp, j) => {
-		const row = retryRows[j];
-		if (resp.getResponseCode() !== 200) {
-			sheet.getRange(row, 1).setBackground('#ffcccc');
-			failures.push(`${row}행 실패: HTTP ${resp.getResponseCode()}`);
-			return;
-		}
-		// 재요청 성공 처리
-		const raw = resp.getContentText().trim();
-		const { status, data, error } = extractMetricsFn(raw);
-		if (status) {
-			sheet.getRange(row, 2, 1, data.length).setValues([data]);
-		} else {
-			sheet.getRange(row, 1).setBackground('#ffcccc');
-			failures.push(`${row}행 실패: ${error}`);
-		}
-		});
-	}
 
 	ui.alert(
 		`✅ ${sheetName} 인사이트 완료\n` +

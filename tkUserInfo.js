@@ -47,7 +47,7 @@ const collectTikTokUserInfo = () => {
 		muteHttpExceptions: true,
 	}));
 
-	const responses = fetchAllInBatches(requests);
+	const responses = fetchAllWithBackoff(requests);
 	const numRows = lastRow - 1;
 	const allValues = Array.from({ length: numRows }, () => Array(6).fill(''));
 	responses.forEach((resp, idx) => {
