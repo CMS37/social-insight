@@ -9,20 +9,29 @@ const buildTikTokPostRequest = ids =>
 		muteHttpExceptions: true,
 	}));
 
-const extractTikTokMetrics = json => {
-	const data = JSON.parse(json);
-	if (data.statusCode !== 0) {
-		return { 
-			status: false,
-			data: [],
-			error: data.statusMsg
+const extractTikTokMetrics = raw => {
+	if (!raw) return { status: false, data: [], error: '빈 응답' };
+	let parsed;
+	try { parsed = JSON.parse(raw); } catch (e) {
+		return { status: false, data: [], error: '잘못된 JSON' };
+	}
+	if (parsed.statusCode !== 0) {
+		return {
+		status: false,
+		data: [],
+		error: parsed.statusMsg || `statusCode ${parsed.statusCode}`,
 		};
 	}
-	const stats = data.itemInfo?.itemStruct?.stats || {};
-	const { playCount ='', commentCount = '', diggCount = '', collectCount = '' } = stats;
+	const stats = parsed.itemInfo?.itemStruct?.stats || {};
+	const {
+		playCount   = '',
+		commentCount= '',
+		diggCount   = '',
+		collectCount= ''
+	} = stats;
 	return {
 		status: true,
-		data: [ playCount, commentCount, diggCount, collectCount ],
+		data: [ playCount, commentCount, diggCount, collectCount ]
 	};
 };
 

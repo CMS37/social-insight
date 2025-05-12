@@ -13,24 +13,28 @@ const buildInstagramPostRequest = urls =>
 		muteHttpExceptions: true,
 	}));
 
-const extractInstagramMetrics = json => {
-	const data = JSON.parse(json);
-	if (!data.status) {
+const extractInstagramMetrics = raw => {
+	if (!raw) return { status: false, data: [], error: '빈 응답' };
+	let parsed;
+	try { parsed = JSON.parse(raw); } catch (e) {
+		return { status: false, data: [], error: '잘못된 JSON' };
+	}
+	if (parsed.statusCode !== 0) {
 		return {
 			status: false,
-			data : [],
-			error: data.errorMessage
-		}
+			data: [], error: parsed.statusMsg || `statusCode ${parsed.statusCode}`
+		};
 	}
-	const viewCount = data.video_view_count || -1;
-	const playCount = data.video_play_count || -1;
-	const commentCount = data.edge_media_to_parent_comment?.count || -1;
-	const likeCount = data.edge_media_preview_like?.count || -1;
+	const js = parsed.data.edge_media_to_parent_comment;
+	const viewCount    = parsed.data.video_view_count ?? -1;
+	const commentCount = js?.count ?? -1;
+	const likeCount    = parsed.data.edge_media_preview_like?.count ?? -1;
+
 	return {
 		status: true,
-		data: [ viewCount, playCount, commentCount, likeCount ],
+		data: [viewCount, commentCount, likeCount]
 	};
-}
+};
 
 const collectInstagramInsight = () => {
 	runInsight(parseInstagramUrl, buildInstagramPostRequest, extractInstagramMetrics, '인스타');
