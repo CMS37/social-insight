@@ -19,16 +19,16 @@ const extractInstagramMetrics = raw => {
 	try { parsed = JSON.parse(raw); } catch (e) {
 		return { status: false, data: [], error: '잘못된 JSON' };
 	}
-	if (parsed.statusCode !== 0) {
-		return {
-			status: false,
-			data: [], error: parsed.statusMsg || `statusCode ${parsed.statusCode}`
-		};
+	if (!parsed.status) {
+	return {
+		status: false,
+		data: [],
+		error: parsed.message || parsed.error || 'API 요청 실패'
+	};
 	}
-	const js = parsed.data.edge_media_to_parent_comment;
-	const viewCount    = parsed.data.video_view_count ?? -1;
-	const commentCount = js?.count ?? -1;
-	const likeCount    = parsed.data.edge_media_preview_like?.count ?? -1;
+	const viewCount    = parsed.is_video ? parsed.video_view_count : '';
+	const commentCount = parsed.edge_media_to_parent_comment?.count ?? '';
+	const likeCount    = parsed.edge_media_preview_like?.count ?? '';
 
 	return {
 		status: true,

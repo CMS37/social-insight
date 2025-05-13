@@ -10,12 +10,12 @@ const getRequiredProperty = key => {
 
 const fetchAllWithBackoff = (requests, batchSize = Config.BATCH_SIZE, baseDelay = Config.DELAY_MS, maxRetries = Config.MAX_RETRIES) => {
 	const allResponses = [];
-	let count = 0;
+	// let count = 0;
 
 	for (let i = 0; i < requests.length; i += batchSize) {
 		const batch = requests.slice(i, i + batchSize);
-		count += batch.length;
-		log(`요청 ${i + 1} ~ ${i + batch.length}: ${batch.length}건`);
+		// count += batch.length;
+		// log(`요청 ${i + 1} ~ ${i + batch.length}: ${batch.length}건`);
 		let responses = UrlFetchApp.fetchAll(batch);
 
 		let retryItems = batch
@@ -24,8 +24,8 @@ const fetchAllWithBackoff = (requests, batchSize = Config.BATCH_SIZE, baseDelay 
 
 		let attempt = 0, delay = baseDelay;
 		while (retryItems.length > 0 && attempt < maxRetries) {
-			log(`재시도 ${attempt + 1}회: ${retryItems.length}건`);
-			count += retryItems.length;
+			// log(`재시도 ${attempt + 1}회: ${retryItems.length}건`);
+			// count += retryItems.length;
 			Utilities.sleep(delay);
 			const retryReqs = retryItems.map(item => item.req);
 			const retryResps = UrlFetchApp.fetchAll(retryReqs);
@@ -46,7 +46,7 @@ const fetchAllWithBackoff = (requests, batchSize = Config.BATCH_SIZE, baseDelay 
 
 		if (i + batchSize < requests.length) Utilities.sleep(baseDelay);
 	}
-	log (`총 ${count}번 요청`);
+	// log (`총 ${count}번 요청`);
 	return allResponses;
 };
 
