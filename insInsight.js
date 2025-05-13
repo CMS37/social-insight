@@ -23,16 +23,17 @@ const extractInstagramMetrics = raw => {
 	return {
 		status: false,
 		data: [],
-		error: parsed.message || parsed.error || 'API 요청 실패'
+		error: parsed.errorMessage
 	};
 	}
-	const viewCount    = parsed.is_video ? parsed.video_view_count : '';
+	const viewCount    = parsed.video_view_count || '0';
+	const playCount    = parsed.video_play_count || '0';
 	const commentCount = parsed.edge_media_to_parent_comment?.count ?? '';
 	const likeCount    = parsed.edge_media_preview_like?.count ?? '';
 
 	return {
 		status: true,
-		data: [viewCount, commentCount, likeCount]
+		data: [viewCount, playCount, commentCount, likeCount]
 	};
 };
 
