@@ -5,10 +5,7 @@ const collectTikTokUserInfo = () => {
 	const sheet = ss.getSheetByName(sheetName);
 
 	const lastRow = sheet.getLastRow();
-	if (lastRow < 2) {
-		ui.alert('❌ 수집할 유저정보가 없습니다.');
-		return;
-	}
+	if (lastRow < 2) return ui.alert('❌ 수집할 유저네임이 없습니다.');
 
 	const userIds = sheet
 		.getRange(2, 1, lastRow - 1, 1)
